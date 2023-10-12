@@ -56,7 +56,6 @@ async function run() {
             // console.log(token)
             res.send({ token })
         })
-
         // -------------------------All toys of platform -------------------------
         app.get('/toy', async (req, res) => {
             const cursor = toy.find();
@@ -69,9 +68,8 @@ async function run() {
             console.log(id)
             const query = {_id: new ObjectId(id)}
             const user = await toy.findOne(query);
-            res.send(user);
-        })
-
+            res.send(user); 
+        })   
         
         // -----------------------------Adding to cart-----------------------------
         app.post('/cart', async (req, res) => {
@@ -86,20 +84,17 @@ async function run() {
             res.send(result)
         })
         // -----------------------------Adding to Enroll list-----------------------------
-       
-
-
-       
-
-
-        app.delete('/cart/:id', async (req, res) => {
-            const id = req.params.id
-            const query = { _id: new ObjectId(id) }
-            const result = await carts.deleteOne(query);
-            res.send(result)
-          })
 
         //---------------------=========Getting the cart==================---------------------
+
+        // app.get('/cart/:id', async (req, res) => {
+        //     const id = req.params.id
+        //     const query = { _id: id };
+        //     const result = await cart.findOne(query);
+        //     console.log("get==>",result);
+        //     res.send(result)
+        // })
+
         app.get('/cart', verifyJwt, async (req, res) => {
             const email = req.query.email;
             console.log(email)
@@ -117,6 +112,16 @@ async function run() {
 
             res.send(result)
         })
+
+        app.delete('/cart/:id', async (req, res) => {
+            const id = req.params.id
+            
+            const query = { _id: id }
+            const data= await cart.findOne(query)
+            console.log( query, data)
+            const result = await cart.deleteOne(query);
+            res.send(result)
+          })
         // ------------------------wish list getting------------------
         app.get('/wish', verifyJwt, async (req, res) => {
             const email = req.query.email;
