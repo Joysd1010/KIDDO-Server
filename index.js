@@ -11,7 +11,7 @@ app.use(express.json());
 
 const verifyJwt = (req, res, next) => {
     const authorization = req.headers.authorization;
-    // console.log(authorization)
+    
     if (!authorization) {
         return res.status(401).send({ error: true, message: 'Unauthorized acces' })
     }
@@ -53,7 +53,7 @@ async function run() {
         app.post('/jwt', (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.API_TOKEN, { expiresIn: '1h' })
-            // console.log(token)
+           
             res.send({ token })
         })
         // -------------------------All toys of platform -------------------------
@@ -65,12 +65,12 @@ async function run() {
         // ---------------------------toy detail page--------------------------------
         app.get('/toys/:id', async(req, res) => {
             const id = req.params.id;
-            console.log(id)
+            
             const query = {_id: new ObjectId(id)}
             const user = await toy.findOne(query);
             res.send(user); 
         })   
-        
+         
         // -----------------------------Adding to cart-----------------------------
         app.post('/cart', async (req, res) => {
             const item = req.body
@@ -83,21 +83,17 @@ async function run() {
             const result = await wish.insertOne(item);
             res.send(result)
         })
-        // -----------------------------Adding to Enroll list-----------------------------
-
-        //---------------------=========Getting the cart==================---------------------
-
-        // app.get('/cart/:id', async (req, res) => {
-        //     const id = req.params.id
-        //     const query = { _id: id };
-        //     const result = await cart.findOne(query);
-        //     console.log("get==>",result);
-        //     res.send(result)
-        // })
+        app.post('/toy', async (req, res) => {
+            const item = req.body
+            
+            const result = await toy.insertOne(item);
+            res.send(result)
+        })
+        
 
         app.get('/cart', verifyJwt, async (req, res) => {
             const email = req.query.email;
-            console.log(email)
+           
 
             if (!email) {
                 return res.send([])
@@ -118,14 +114,26 @@ async function run() {
             
             const query = { _id: id }
             const data= await cart.findOne(query)
-            console.log( query, data)
+            
             const result = await cart.deleteOne(query);
             res.send(result)
           })
+          //----------------------Clearing Cart-------------------------
+          app.delete('/PaymentCart',async(req,res)=>{
+            const email=req.query
+            console.log(email)
+            const data =await cart.find(email).toArray()
+           
+
+            const result=await cart.deleteMany(email)
+            res.send(result)
+          })
+
+
         // ------------------------wish list getting------------------
         app.get('/wish', verifyJwt, async (req, res) => {
             const email = req.query.email;
-            console.log(email)
+           
 
             if (!email) {
                 return res.send([])
@@ -164,21 +172,30 @@ async function run() {
             res.send(result)
           })
         // -------------------------------------Verifying Admin-------------------------
-        app.get('/user/seller/:email', verifyJwt, async (req, res) => {
-            const email = req.params.email
-            if (req.decode.email !== email) {
-              res.send({ Admin: false })
-            }      
-            const query = { email: email }
-                  const prouser = await users.findOne(query)
-            const result = { instructor: prouser?.role === 'admin' }
-            res.send(result)
-          })
+        app.get('/user/:email', async (req, res) => {
+            try {
+              const userEmail = req.params.email;
+          
+              
+              const user = await users.findOne({ email: userEmail });
+          
+              if (user) {
+               
+                res.json(user);
+              } else {
+                
+                res.status(404).json({ message: 'User not found' });
+              }
+            } catch (error) {
+              // Handle any errors that occur during the query or request
+              res.status(500).json({ message: 'Internal server error' });
+            }
+          });
 
 
 
         await client.db("admin").command({ ping: 1 });
-        //console.log("Pinged your deployment. You successfully connected to MongoDB!");
+       
     } finally {
 
     }
