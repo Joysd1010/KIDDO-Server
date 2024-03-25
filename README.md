@@ -1,5 +1,4 @@
-
-```markdown
+
 # KIDDO-Server
 
 KIDDO-Server is the backend server for the Kiddo toy shop application. It provides RESTful APIs for user authentication, managing toy inventory, processing purchases, and generating receipts.
